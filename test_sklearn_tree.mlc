@@ -1,6 +1,0 @@
-dataset "/home/madhava/datasets/iris.csv"
-
-model DecisionTreeClassifier {
-    max_depth = 5
-    criterion = "entropy"
-}

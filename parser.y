@@ -149,10 +149,7 @@ char* strip_quotes(char* str) {
 const char* detect_backend(const char* model_name) {
     // Scikit-learn models
     if (strstr(model_name, "LinearRegression") || strstr(model_name, "LogisticRegression") ||
-        strstr(model_name, "DecisionTree") || strstr(model_name, "RandomForest") ||
-        strstr(model_name, "KNeighbors") || strstr(model_name, "SVC") ||
-        strstr(model_name, "GaussianNB") || strstr(model_name, "KMeans") ||
-        strstr(model_name, "LinearSVC") || strstr(model_name, "SGDClassifier")) {
+        strstr(model_name, "DecisionTree") || strstr(model_name, "RandomForest")) {
         return "sklearn";
     }
     
