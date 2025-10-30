@@ -147,16 +147,13 @@ char* strip_quotes(char* str) {
 
 // Detect backend based on model name
 const char* detect_backend(const char* model_name) {
-    // Scikit-learn models
-    if (strstr(model_name, "LinearRegression") || strstr(model_name, "LogisticRegression") ||
-        strstr(model_name, "DecisionTree") || strstr(model_name, "RandomForest")) {
+    // Scikit-learn models (only LinearRegression and RandomForest)
+    if (strstr(model_name, "LinearRegression") || strstr(model_name, "RandomForest")) {
         return "sklearn";
     }
     
-    // TensorFlow models
-    if (strstr(model_name, "ResNet") || strstr(model_name, "VGG") || 
-        strstr(model_name, "EfficientNet") || strstr(model_name, "MobileNet") ||
-        strstr(model_name, "DenseNet") || strstr(model_name, "InceptionV3")) {
+    // TensorFlow models (only ResNet)
+    if (strstr(model_name, "ResNet")) {
         return "tensorflow";
     }
     
@@ -187,7 +184,6 @@ const char* to_python_value(const char* value) {
     } else {
         // Check if it's a string that needs quotes
         // If it starts with a letter and contains only alphanumeric/underscore, add quotes
-        int needs_quotes = 0;
         if (value[0] >= 'a' && value[0] <= 'z') {
             // Check if it's not a number and not a boolean
             if (strcmp(value, "True") != 0 && strcmp(value, "False") != 0 &&
@@ -394,187 +390,11 @@ void generate_model_code(FILE *fp, Model *m, const char* backend) {
             fprintf(fp, "print(f'📊 Mean Squared Error: {mse:.4f}')\n");
             fprintf(fp, "print(f'📊 R² Score: {r2:.4f}')\n");
             
-        } else if (strcmp(m->name, "LogisticRegression") == 0) {
-            fprintf(fp, "from sklearn.linear_model import LogisticRegression\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = LogisticRegression(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "DecisionTreeClassifier") == 0) {
-            fprintf(fp, "from sklearn.tree import DecisionTreeClassifier\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = DecisionTreeClassifier(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
         } else if (strcmp(m->name, "RandomForestClassifier") == 0) {
             fprintf(fp, "from sklearn.ensemble import RandomForestClassifier\n");
             fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
             fprintf(fp, "# Initialize model\n");
             fprintf(fp, "model = RandomForestClassifier(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "KNeighborsClassifier") == 0) {
-            fprintf(fp, "from sklearn.neighbors import KNeighborsClassifier\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = KNeighborsClassifier(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "SVC") == 0) {
-            fprintf(fp, "from sklearn.svm import SVC\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = SVC(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "GaussianNB") == 0) {
-            fprintf(fp, "from sklearn.naive_bayes import GaussianNB\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = GaussianNB()\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "KMeans") == 0) {
-            fprintf(fp, "from sklearn.cluster import KMeans\n");
-            fprintf(fp, "from sklearn.metrics import silhouette_score\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = KMeans(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training (clustering)\n");
-            fprintf(fp, "print('🚀 Starting clustering...')\n");
-            fprintf(fp, "model.fit(X_train)\n");
-            fprintf(fp, "print('✅ Clustering completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "labels = model.labels_\n");
-            fprintf(fp, "silhouette = silhouette_score(X_train, labels)\n");
-            fprintf(fp, "print(f'📊 Silhouette Score: {silhouette:.4f}')\n");
-            fprintf(fp, "print(f'📊 Inertia: {model.inertia_:.4f}')\n");
-            
-        } else if (strcmp(m->name, "LinearSVC") == 0) {
-            fprintf(fp, "from sklearn.svm import LinearSVC\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = LinearSVC(");
-            int first = 1;
-            for (int i = 0; i < m->param_count; i++) {
-                if (!first) fprintf(fp, ", ");
-                fprintf(fp, "%s=%s", m->param_names[i], to_python_value(m->param_values[i]));
-                first = 0;
-            }
-            fprintf(fp, ")\n\n");
-            fprintf(fp, "# Training\n");
-            fprintf(fp, "print('🚀 Starting training...')\n");
-            fprintf(fp, "model.fit(X_train, y_train)\n");
-            fprintf(fp, "print('✅ Training completed!')\n\n");
-            fprintf(fp, "# Evaluation\n");
-            fprintf(fp, "y_pred = model.predict(X_test)\n");
-            fprintf(fp, "accuracy = accuracy_score(y_test, y_pred)\n");
-            fprintf(fp, "print(f'📊 Accuracy: {accuracy:.4f}')\n");
-            fprintf(fp, "print('\\n📋 Classification Report:')\n");
-            fprintf(fp, "print(classification_report(y_test, y_pred))\n");
-            
-        } else if (strcmp(m->name, "SGDClassifier") == 0) {
-            fprintf(fp, "from sklearn.linear_model import SGDClassifier\n");
-            fprintf(fp, "from sklearn.metrics import accuracy_score, classification_report\n\n");
-            fprintf(fp, "# Initialize model\n");
-            fprintf(fp, "model = SGDClassifier(");
             int first = 1;
             for (int i = 0; i < m->param_count; i++) {
                 if (!first) fprintf(fp, ", ");

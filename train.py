@@ -3,44 +3,59 @@
 # Auto-generated machine learning training script
 
 # =====================================
-# Model 1: KMeans
-# Backend: sklearn
+# Model 1: ResNet50
+# Backend: tensorflow
 # =====================================
 
+epochs = 10
+batch_size = 32
+learning_rate = 0.001000
+
 # Dataset Loading
-import pandas as pd
-from sklearn.model_selection import train_test_split
+import tensorflow as tf
 
-# Load dataset (assuming CSV format)
-dataset = pd.read_csv('/home/madhava/datasets/clustering.csv')
-# Separate features and target (assuming last column is target)
-X = dataset.iloc[:, :-1].values
-y = dataset.iloc[:, -1].values
+# Load dataset from directory
+train_ds = tf.keras.utils.image_dataset_from_directory(
+    '/home/madhava/datasets/flowers',
+    image_size=(224, 224),
+    batch_size=batch_size,
+    label_mode='categorical'
+)
 
-# Split into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Normalize pixel values
+normalization_layer = tf.keras.layers.Rescaling(1./255)
+train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
 
-# Model: KMeans (sklearn backend)
-# Scikit-learn model
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+# Model: ResNet50 (tensorflow backend)
+import tensorflow as tf
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
 
-# Initialize model
-model = KMeans(n_clusters=3, max_iter=300)
+# Build model
+base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(1024, activation='relu')(x)
+predictions = Dense(len(train_ds.class_names), activation='softmax')(x)
+model = Model(inputs=base_model.input, outputs=predictions)
 
-# Training (clustering)
-print('🚀 Starting clustering...')
-model.fit(X_train)
-print('✅ Clustering completed!')
+# Compile model
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-# Evaluation
-labels = model.labels_
-silhouette = silhouette_score(X_train, labels)
-print(f'📊 Silhouette Score: {silhouette:.4f}')
-print(f'📊 Inertia: {model.inertia_:.4f}')
+# Training
+print('🚀 Starting training...')
+history = model.fit(
+    train_ds,
+    epochs=epochs,
+    verbose=1
+)
 
-# Save model
-import joblib
-joblib.dump(model, 'model.pkl')
-print('💾 Model saved as model.pkl')
+print('✅ Training completed!')
+model.save('trained_model.h5')
+print('💾 Model saved as trained_model.h5')
 
