@@ -1,0 +1,6 @@
+dataset "/home/madhava/datasets/classification.csv"
+
+model LogisticRegression {
+    max_iter = 200
+    solver = "lbfgs"
+}

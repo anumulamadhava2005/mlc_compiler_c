@@ -1,0 +1,7 @@
+dataset "/home/madhava/datasets/images"
+
+model UNet {
+    epochs = 20
+    batch_size = 16
+    learning_rate = 0.0001
+}

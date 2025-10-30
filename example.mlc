@@ -1,0 +1,6 @@
+dataset "/path/to/dataset"
+
+model ResNet50 {
+    epochs = 10
+    learning_rate = 0.001
+}

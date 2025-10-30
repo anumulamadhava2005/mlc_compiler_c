@@ -1,0 +1,6 @@
+dataset "/home/madhava/datasets/clustering.csv"
+
+model KMeans {
+    n_clusters = 3
+    max_iter = 300
+}

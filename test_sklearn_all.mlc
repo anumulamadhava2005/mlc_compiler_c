@@ -1,0 +1,3 @@
+dataset "/home/madhava/datasets/data.csv"
+
+model GaussianNB {}

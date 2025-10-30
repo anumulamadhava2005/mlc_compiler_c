@@ -1,0 +1,6 @@
+dataset "/home/madhava/datasets/iris.csv"
+
+model SVC {
+    kernel = "rbf"
+    C = 1.0
+}

@@ -1,0 +1,5 @@
+dataset "/home/madhava/datasets/housing.csv"
+
+model LinearRegression {
+    fit_intercept = true
+}

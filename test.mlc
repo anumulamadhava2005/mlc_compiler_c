@@ -1,4 +1,7 @@
-model LinearRegression {
-    epochs = 50
-    learning_rate = 0.01
+dataset "/home/madhava/datasets/flowers"
+
+model ResNet50 {
+    epochs = 10
+    batch_size = 32
+    learning_rate = 0.001
 }
