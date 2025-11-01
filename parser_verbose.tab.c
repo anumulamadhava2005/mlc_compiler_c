@@ -93,7 +93,7 @@ char* strip_quotes(char* str);
 extern int verbose_mode;
 
 
-#line 97 "parser.tab.c"
+#line 97 "parser_verbose.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -116,7 +116,7 @@ extern int verbose_mode;
 #  endif
 # endif
 
-#include "parser.tab.h"
+#include "parser_verbose.tab.h"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -1114,7 +1114,7 @@ yyreduce:
         printf("\n✅ Parsing completed successfully!\n");
         generate_python();
     }
-#line 1118 "parser.tab.c"
+#line 1118 "parser_verbose.tab.c"
     break;
 
   case 3: /* program: model_def_list  */
@@ -1131,7 +1131,7 @@ yyreduce:
         printf("\n✅ Parsing completed successfully!\n");
         generate_python();
     }
-#line 1135 "parser.tab.c"
+#line 1135 "parser_verbose.tab.c"
     break;
 
   case 4: /* dataset_decl: DATASET STRING  */
@@ -1146,7 +1146,7 @@ yyreduce:
         free(path);
         free((yyvsp[0].strVal));
     }
-#line 1150 "parser.tab.c"
+#line 1150 "parser_verbose.tab.c"
     break;
 
   case 7: /* $@1: %empty  */
@@ -1158,7 +1158,7 @@ yyreduce:
         m->param_count = 0;
         free((yyvsp[0].strVal));
     }
-#line 1162 "parser.tab.c"
+#line 1162 "parser_verbose.tab.c"
     break;
 
   case 8: /* model_def: MODEL ID $@1 LBRACE param_list RBRACE  */
@@ -1166,7 +1166,7 @@ yyreduce:
     {
         prog.model_count++;
     }
-#line 1170 "parser.tab.c"
+#line 1170 "parser_verbose.tab.c"
     break;
 
   case 12: /* param: ID ASSIGN value  */
@@ -1185,7 +1185,7 @@ yyreduce:
         free((yyvsp[-2].strVal));
         free((yyvsp[0].strVal));
     }
-#line 1189 "parser.tab.c"
+#line 1189 "parser_verbose.tab.c"
     break;
 
   case 13: /* value: INT  */
@@ -1195,7 +1195,7 @@ yyreduce:
         sprintf(buf, "%d", (yyvsp[0].intVal));
         (yyval.strVal) = strdup(buf);
     }
-#line 1199 "parser.tab.c"
+#line 1199 "parser_verbose.tab.c"
     break;
 
   case 14: /* value: FLOAT  */
@@ -1205,7 +1205,7 @@ yyreduce:
         sprintf(buf, "%.6f", (yyvsp[0].floatVal));
         (yyval.strVal) = strdup(buf);
     }
-#line 1209 "parser.tab.c"
+#line 1209 "parser_verbose.tab.c"
     break;
 
   case 15: /* value: STRING  */
@@ -1214,7 +1214,7 @@ yyreduce:
         (yyval.strVal) = strip_quotes((yyvsp[0].strVal));
         free((yyvsp[0].strVal));
     }
-#line 1218 "parser.tab.c"
+#line 1218 "parser_verbose.tab.c"
     break;
 
   case 16: /* value: ID  */
@@ -1223,11 +1223,11 @@ yyreduce:
         (yyval.strVal) = strdup((yyvsp[0].strVal));
         free((yyvsp[0].strVal));
     }
-#line 1227 "parser.tab.c"
+#line 1227 "parser_verbose.tab.c"
     break;
 
 
-#line 1231 "parser.tab.c"
+#line 1231 "parser_verbose.tab.c"
 
       default: break;
     }

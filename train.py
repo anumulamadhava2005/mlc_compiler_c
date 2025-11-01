@@ -3,59 +3,53 @@
 # Auto-generated machine learning training script
 
 # =====================================
-# Model 1: ResNet50
-# Backend: tensorflow
+# Model 1: BERT
+# Backend: transformers
 # =====================================
 
-epochs = 10
-batch_size = 32
-learning_rate = 0.001000
+epochs = 3
+batch_size = 8
+learning_rate = 0.000020
 
 # Dataset Loading
-import tensorflow as tf
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
+from datasets import load_dataset
 
-# Load dataset from directory
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    '/home/madhava/datasets/flowers',
-    image_size=(224, 224),
-    batch_size=batch_size,
-    label_mode='categorical'
-)
+# Load dataset
+dataset = load_dataset('imdb')
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# Normalize pixel values
-normalization_layer = tf.keras.layers.Rescaling(1./255)
-train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+def tokenize_function(examples):
+    return tokenizer(examples['text'], padding='max_length', truncation=True)
 
-# Model: ResNet50 (tensorflow backend)
-import tensorflow as tf
-from tensorflow.keras.applications import ResNet50
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from tensorflow.keras.models import Model
+tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-# Build model
-base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-x = base_model.output
-x = GlobalAveragePooling2D()(x)
-x = Dense(1024, activation='relu')(x)
-predictions = Dense(len(train_ds.class_names), activation='softmax')(x)
-model = Model(inputs=base_model.input, outputs=predictions)
+# Model: BERT (transformers backend)
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
 
-# Compile model
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-    loss='categorical_crossentropy',
-    metrics=['accuracy']
-)
+# Model
+model_name = 'BERT'
+model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
 
 # Training
-print('🚀 Starting training...')
-history = model.fit(
-    train_ds,
-    epochs=epochs,
-    verbose=1
+training_args = TrainingArguments(
+    output_dir='./results',
+    num_train_epochs=epochs,
+    per_device_train_batch_size=batch_size,
+    learning_rate=learning_rate,
+    evaluation_strategy='epoch',
 )
 
-print('✅ Training completed!')
-model.save('trained_model.h5')
-print('💾 Model saved as trained_model.h5')
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized_datasets['train'],
+    eval_dataset=tokenized_datasets['test'],
+)
 
+trainer.train()
+print('Training complete!')
+
+# Save model
+trainer.save_model('./model')
+print('Model saved!')

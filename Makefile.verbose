@@ -1,0 +1,35 @@
+# Makefile for MLC Compiler (Verbose Mode with All Phases)
+
+CC = gcc
+CFLAGS = -Wall -Wno-unused-function -Wno-format-truncation
+FLEX = flex
+BISON = bison
+
+# Targets
+all: mlc_compiler_verbose
+
+mlc_compiler_verbose: parser.tab.o lex.yy.o compiler_phases.o main_verbose.o
+	$(CC) $(CFLAGS) -o mlc_compiler_verbose parser.tab.o lex.yy.o compiler_phases.o main_verbose.o
+
+parser.tab.c parser.tab.h: parser_verbose.y
+	$(BISON) -d -o parser.tab.c parser_verbose.y
+
+parser.tab.o: parser.tab.c
+	$(CC) $(CFLAGS) -c parser.tab.c
+
+lex.yy.c: lexer_verbose.l parser.tab.h
+	$(FLEX) lexer_verbose.l
+
+lex.yy.o: lex.yy.c parser.tab.h
+	$(CC) $(CFLAGS) -c lex.yy.c
+
+compiler_phases.o: compiler_phases.c compiler_phases.h ast.h
+	$(CC) $(CFLAGS) -c compiler_phases.c
+
+main_verbose.o: main_verbose.c parser.tab.h compiler_phases.h
+	$(CC) $(CFLAGS) -c main_verbose.c
+
+clean:
+	rm -f lex.yy.c lex.yy.o parser.tab.c parser.tab.h parser.tab.o *.o mlc_compiler_verbose
+
+.PHONY: all clean
