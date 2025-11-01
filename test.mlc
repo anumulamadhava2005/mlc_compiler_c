@@ -1,7 +1,14 @@
-dataset "/home/madhava/datasets/flowers"
+dataset "./data.csv"
 
-model ResNet50 {
-    epochs = 10
-    batch_size = 32
-    learning_rate = 0.001
+model SVM {
+    kernel = "linear"
+    C = 1.0
+}
+
+model LDA {
+    solver = "svd"
+}
+
+model LinearRegression {
+    fit_intercept = true
 }

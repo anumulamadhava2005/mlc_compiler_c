@@ -3,53 +3,117 @@
 # Auto-generated machine learning training script
 
 # =====================================
-# Model 1: BERT
-# Backend: transformers
+# Model 1: SVM
+# Backend: sklearn
 # =====================================
 
-epochs = 3
-batch_size = 8
-learning_rate = 0.000020
+kernel = linear
+C = 1.000000
 
-# Dataset Loading
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
-from datasets import load_dataset
+# Imports
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import joblib
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
 
 # Load dataset
-dataset = load_dataset('imdb')
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+dataset = pd.read_csv('./data.csv')
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
 
-def tokenize_function(examples):
-    return tokenizer(examples['text'], padding='max_length', truncation=True)
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-tokenized_datasets = dataset.map(tokenize_function, batched=True)
+# Model: SVM
+model = SVC(kernel="linear", C=1.000000)
 
-# Model: BERT (transformers backend)
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
+print('🚀 Starting training...')
+model.fit(X_train, y_train)
+print('✅ Training completed!')
 
-# Model
-model_name = 'BERT'
-model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
-
-# Training
-training_args = TrainingArguments(
-    output_dir='./results',
-    num_train_epochs=epochs,
-    per_device_train_batch_size=batch_size,
-    learning_rate=learning_rate,
-    evaluation_strategy='epoch',
-)
-
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_datasets['train'],
-    eval_dataset=tokenized_datasets['test'],
-)
-
-trainer.train()
-print('Training complete!')
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f'📊 Accuracy: {accuracy:.4f}')
+print('\n📋 Classification Report:')
+print(classification_report(y_test, y_pred))
 
 # Save model
-trainer.save_model('./model')
-print('Model saved!')
+joblib.dump(model, 'model.pkl')
+print('💾 Model saved as model.pkl')
+# =====================================
+# Model 2: LDA
+# Backend: sklearn
+# =====================================
+
+solver = svd
+
+# Imports
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import joblib
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load dataset
+dataset = pd.read_csv('./data.csv')
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model: LDA
+model = LinearDiscriminantAnalysis(solver="svd")
+
+print('🚀 Starting training...')
+model.fit(X_train, y_train)
+print('✅ Training completed!')
+
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(f'📊 Accuracy: {accuracy:.4f}')
+print('\n📋 Classification Report:')
+print(classification_report(y_test, y_pred))
+
+# Save model
+joblib.dump(model, 'model.pkl')
+print('💾 Model saved as model.pkl')
+# =====================================
+# Model 3: LinearRegression
+# Backend: sklearn
+# =====================================
+
+fit_intercept = true
+
+# Imports
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import joblib
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Load dataset
+dataset = pd.read_csv('./data.csv')
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model: LinearRegression
+model = LinearRegression(fit_intercept=True)
+
+print('🚀 Starting training...')
+model.fit(X_train, y_train)
+print('✅ Training completed!')
+
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+print(f'📊 Mean Squared Error: {mse:.4f}')
+print(f'📊 R² Score: {r2:.4f}')
+
+# Save model
+joblib.dump(model, 'model.pkl')
+print('💾 Model saved as model.pkl')

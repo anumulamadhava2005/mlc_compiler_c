@@ -1,32 +1,35 @@
-# Compiler and flags
+# Makefile for MLC Compiler (Verbose Mode with All Phases)
+
 CC = gcc
-CFLAGS = -Wall -g -O0 -I.
-
-# Tools
+CFLAGS = -Wall -Wno-unused-function -Wno-format-truncation
+FLEX = flex
 BISON = bison
-FLEX  = flex
 
-# Files
-PARSER = parser.y
-LEXER  = lexer.l
-MAIN   = main.c       # Your main C file, can also be parser.tab.c if you put everything in parser.y
-TARGET = mlc_compiler
+# Targets
+all: mlc_compiler
 
-# Default target
-all: $(TARGET)
+mlc_compiler: parser.tab.o lex.yy.o compiler_phases.o main.o
+	$(CC) $(CFLAGS) -o mlc_compiler parser.tab.o lex.yy.o compiler_phases.o main.o
 
-# Build the parser and lexer, then compile
-$(TARGET): parser.tab.c lex.yy.c $(MAIN)
-	$(CC) $(CFLAGS) -o $(TARGET) parser.tab.c lex.yy.c $(MAIN) -lfl
+parser.tab.c parser.tab.h: parser.y
+	$(BISON) -d -o parser.tab.c parser.y
 
-# Generate parser files from Bison
-parser.tab.c parser.tab.h: $(PARSER)
-	$(BISON) -d --report=none $(PARSER)
+parser.tab.o: parser.tab.c
+	$(CC) $(CFLAGS) -c parser.tab.c
 
-# Generate lexer files from Flex
-lex.yy.c: $(LEXER)
-	$(FLEX) -o lex.yy.c $(LEXER)
+lex.yy.c: lexer.l parser.tab.h
+	$(FLEX) lexer.l
 
-# Clean generated files
+lex.yy.o: lex.yy.c parser.tab.h
+	$(CC) $(CFLAGS) -c lex.yy.c
+
+compiler_phases.o: compiler_phases.c compiler_phases.h ast.h
+	$(CC) $(CFLAGS) -c compiler_phases.c
+
+main.o: main.c parser.tab.h compiler_phases.h
+	$(CC) $(CFLAGS) -c main.c
+
 clean:
-	rm -f $(TARGET) parser.tab.c parser.tab.h lex.yy.c *.o train.py
+	rm -f lex.yy.c lex.yy.o parser.tab.c parser.tab.h parser.tab.o *.o mlc_compiler
+
+.PHONY: all clean
