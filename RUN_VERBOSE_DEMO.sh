@@ -6,11 +6,11 @@ echo "╚═══════════════════════�
 echo ""
 
 # Build the verbose compiler
-echo "🔧 Building verbose compiler..."
-make -f Makefile.verbose clean
-make -f Makefile.verbose
+echo "🔧 Building MLC compiler..."
+make clean
+make
 
-if [ ! -f mlc_compiler_verbose ]; then
+if [ ! -f mlc_compiler ]; then
     echo "❌ Build failed!"
     exit 1
 fi
@@ -23,7 +23,7 @@ echo "════════════════════════�
 echo ""
 
 # Run with verbose mode
-./mlc_compiler_verbose -v example_verbose.mlc
+./mlc_compiler -v example.mlc
 
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
