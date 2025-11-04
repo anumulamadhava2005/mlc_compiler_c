@@ -6,6 +6,7 @@
 
 typedef struct {
     char name[64];
+    char backend[64];  // User-specified backend (e.g., "sklearn", "tensorflow")
     char param_names[MAX_PARAMS][64];
     char param_values[MAX_PARAMS][64];
     int param_count;

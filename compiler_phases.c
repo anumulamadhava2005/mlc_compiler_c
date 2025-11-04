@@ -4,9 +4,6 @@
 
 extern int verbose_mode;
 
-// ========================================
-// PHASE 1: LEXICAL ANALYSIS
-// ========================================
 void phase1_lexical_analysis() {
     if (!verbose_mode) return;
     
@@ -15,12 +12,8 @@ void phase1_lexical_analysis() {
     printf("🔹 PHASE 1: LEXICAL ANALYSIS\n");
     printf("═══════════════════════════════════════════════════════════════\n");
     printf("Tokens extracted:\n\n");
-    // Tokens are printed during lexing in lexer_verbose.l
 }
 
-// ========================================
-// PHASE 2: SYNTAX ANALYSIS
-// ========================================
 void print_parse_tree_recursive(Model *m, int indent) {
     char prefix[100] = "";
     for (int i = 0; i < indent; i++) strcat(prefix, "  ");
@@ -66,9 +59,6 @@ void phase2_syntax_analysis(Program *prog) {
     }
 }
 
-// ========================================
-// PHASE 3: SEMANTIC ANALYSIS
-// ========================================
 void phase3_semantic_analysis(Program *prog, SymbolTable *symtab) {
     if (!verbose_mode) return;
     
@@ -145,9 +135,6 @@ void print_symbol_table(SymbolTable *symtab) {
     printf("└────────────────────┴──────────┴────────────────┴────────────────┘\n");
 }
 
-// ========================================
-// PHASE 4: INTERMEDIATE REPRESENTATION
-// ========================================
 void phase4_ir_generation(Program *prog, IRCode *ir) {
     if (!verbose_mode) return;
     
@@ -234,9 +221,6 @@ void print_ir_code(IRCode *ir) {
     }
 }
 
-// ========================================
-// PHASE 5: CODE OPTIMIZATION
-// ========================================
 void phase5_optimization(IRCode *ir) {
     if (!verbose_mode) return;
     
@@ -267,9 +251,6 @@ void phase5_optimization(IRCode *ir) {
     printf("  Instructions: %d → %d (no change - code already optimal)\n", ir->count, optimized.count);
 }
 
-// ========================================
-// PHASE 6: CODE GENERATION
-// ========================================
 void phase6_code_generation(Program *prog, const char* backend) {
     if (!verbose_mode) return;
     
@@ -294,9 +275,6 @@ void phase6_code_generation(Program *prog, const char* backend) {
     printf("\n✅ Target code written to: train.py\n");
 }
 
-// ========================================
-// PHASE 7: CODE LINKING & ASSEMBLY
-// ========================================
 void phase7_linking(const char* backend) {
     if (!verbose_mode) return;
     

@@ -1,0 +1,8 @@
+dataset "./data.csv"
+
+model KNeighborsClassifier {
+    backend = sklearn
+    n_neighbors = 5
+    weights = uniform
+    algorithm = auto
+}

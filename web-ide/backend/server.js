@@ -6,6 +6,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import archiver from 'archiver'
+import multer from 'multer'
+import axios from 'axios'
 
 const execAsync = promisify(exec)
 const __filename = fileURLToPath(import.meta.url)
@@ -26,6 +28,18 @@ app.use(express.json())
 
 // Ensure temp directory exists
 await fs.mkdir(TEMP_DIR, { recursive: true })
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: TEMP_DIR,
+  filename: (req, file, cb) => {
+    cb(null, `upload_${Date.now()}_${file.originalname}`)
+  }
+})
+const upload = multer({ storage })
+
+// Prediction API URL
+const PREDICT_API_URL = 'http://localhost:5001'
 
 // Compile endpoint
 app.post('/api/compile', async (req, res) => {
@@ -173,6 +187,80 @@ app.get('/api/download/venv', async (req, res) => {
   }
 })
 
+// Check if model exists
+app.get('/api/predict/check-model', async (req, res) => {
+  try {
+    const response = await axios.get(`${PREDICT_API_URL}/api/predict/check-model`)
+    res.json(response.data)
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({ 
+        exists: false, 
+        error: 'Prediction API not running. Please start predict_api.py' 
+      })
+    } else {
+      res.status(500).json({ exists: false, error: error.message })
+    }
+  }
+})
+
+// Predict from uploaded CSV
+app.post('/api/predict/from-csv', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' })
+    }
+
+    // Create form data to send to Flask API
+    const FormData = (await import('form-data')).default
+    const formData = new FormData()
+    const fileStream = await fs.readFile(req.file.path)
+    formData.append('file', fileStream, req.file.originalname)
+
+    // Forward to Flask API
+    const response = await axios.post(`${PREDICT_API_URL}/api/predict/from-csv`, formData, {
+      headers: formData.getHeaders()
+    })
+
+    // Clean up uploaded file
+    await fs.unlink(req.file.path)
+
+    res.json(response.data)
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({ 
+        success: false, 
+        error: 'Prediction API not running. Please start predict_api.py' 
+      })
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: error.response?.data?.error || error.message 
+      })
+    }
+  }
+})
+
+// Predict from manual input
+app.post('/api/predict/from-input', async (req, res) => {
+  try {
+    const response = await axios.post(`${PREDICT_API_URL}/api/predict/from-input`, req.body)
+    res.json(response.data)
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({ 
+        success: false, 
+        error: 'Prediction API not running. Please start predict_api.py' 
+      })
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: error.response?.data?.error || error.message 
+      })
+    }
+  }
+})
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
@@ -182,4 +270,6 @@ app.listen(PORT, () => {
   console.log(`🚀 MLC Compiler Backend running on http://localhost:${PORT}`)
   console.log(`📂 Compiler directory: ${COMPILER_DIR}`)
   console.log(`🔧 Compiler path: ${COMPILER_PATH}`)
+  console.log(`\n💡 To enable predictions, start the Flask API:`)
+  console.log(`   cd backend && python3 predict_api.py`)
 })
