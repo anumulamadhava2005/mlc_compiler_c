@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
-import { PlayCircle, Download, FileCode, Terminal, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { PlayCircle, Download, FileCode, Terminal, Loader2, CheckCircle, XCircle, FileText, Folder } from 'lucide-react'
 import axios from 'axios'
 
 const DEFAULT_CODE = `dataset "/home/madhava/datasets/flowers"
@@ -17,12 +17,14 @@ function App() {
   const [isCompiling, setIsCompiling] = useState(false)
   const [compilationStatus, setCompilationStatus] = useState(null)
   const [generatedFiles, setGeneratedFiles] = useState(null)
+  const [generatedFileContent, setGeneratedFileContent] = useState(null)
 
   const handleCompile = async () => {
     setIsCompiling(true)
     setOutput('Compiling...\n')
     setCompilationStatus(null)
     setGeneratedFiles(null)
+    setGeneratedFileContent(null)
 
     try {
       const response = await axios.post('/api/compile', { code })
@@ -31,6 +33,11 @@ function App() {
         setOutput(response.data.output)
         setCompilationStatus('success')
         setGeneratedFiles(response.data.files)
+        
+        // Automatically load train.py content
+        if (response.data.files.train) {
+          loadGeneratedFile()
+        }
       } else {
         setOutput(response.data.error || 'Compilation failed')
         setCompilationStatus('error')
@@ -40,6 +47,17 @@ function App() {
       setCompilationStatus('error')
     } finally {
       setIsCompiling(false)
+    }
+  }
+
+  const loadGeneratedFile = async () => {
+    try {
+      const response = await axios.get('/api/files/train')
+      if (response.data.success) {
+        setGeneratedFileContent(response.data.content)
+      }
+    } catch (error) {
+      console.error('Error loading generated file:', error)
     }
   }
 
@@ -133,7 +151,7 @@ model BERT {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Editor Panel */}
-        <div className="flex-1 flex flex-col border-r border-gray-700">
+        <div className="flex-1 flex flex-col border-r border-gray-700" style={{ width: '40%' }}>
           <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
             <span className="text-sm font-semibold">config.mlc</span>
             <button
@@ -175,8 +193,56 @@ model BERT {
           </div>
         </div>
 
+        {/* Generated File Explorer Panel */}
+        {generatedFileContent && (
+          <div className="flex flex-col bg-gray-850 border-r border-gray-700" style={{ width: '35%' }}>
+            <div className="bg-gray-800 px-4 py-2 border-b border-gray-700">
+              <div className="flex items-center gap-2 text-sm">
+                <Folder className="w-4 h-4 text-blue-400" />
+                <span className="font-semibold">Generated Files</span>
+              </div>
+            </div>
+            
+            <div className="px-2 py-2 bg-gray-800 border-b border-gray-700">
+              <div className="flex items-center gap-2 px-2 py-1 hover:bg-gray-700 rounded cursor-pointer">
+                <FileText className="w-4 h-4 text-green-400" />
+                <span className="text-sm">train.py</span>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-hidden">
+              <Editor
+                height="100%"
+                defaultLanguage="python"
+                theme="vs-dark"
+                value={generatedFileContent}
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  lineNumbers: 'on',
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 4,
+                  wordWrap: 'on'
+                }}
+              />
+            </div>
+            
+            <div className="border-t border-gray-700 p-3 bg-gray-800">
+              <button
+                onClick={() => handleDownload('train')}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium"
+              >
+                <Download className="w-4 h-4" />
+                Download train.py
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Output Panel */}
-        <div className="w-96 flex flex-col bg-gray-850">
+        <div className="flex flex-col bg-gray-850" style={{ width: generatedFileContent ? '25%' : '60%' }}>
           <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center gap-2">
             <Terminal className="w-4 h-4" />
             <span className="text-sm font-semibold">Output</span>
@@ -191,33 +257,6 @@ model BERT {
           <div className="flex-1 overflow-auto p-4">
             <pre className="text-sm font-mono text-gray-300 whitespace-pre-wrap">{output || 'Click "Compile" to generate training script...'}</pre>
           </div>
-
-          {/* Download Section */}
-          {generatedFiles && (
-            <div className="border-t border-gray-700 p-4 bg-gray-800">
-              <h3 className="text-sm font-semibold mb-3">Download Generated Files</h3>
-              <div className="space-y-2">
-                {generatedFiles.train && (
-                  <button
-                    onClick={() => handleDownload('train')}
-                    className="w-full flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download train.py
-                  </button>
-                )}
-                {generatedFiles.venv && (
-                  <button
-                    onClick={() => handleDownload('venv')}
-                    className="w-full flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download venv.zip
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

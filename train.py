@@ -3,30 +3,30 @@
 # Auto-generated machine learning training script
 
 # =====================================
-# Model 1: SVM
+# Model 1: RandomForestClassifier
 # Backend: sklearn
 # =====================================
 
-kernel = linear
-C = 1.000000
+n_estimators = 100
+max_depth = 4
 
 # Imports
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import joblib
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
 # Load dataset
-dataset = pd.read_csv('./data.csv')
+dataset = pd.read_csv('/home/madhava/datasets/classification.csv')
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 
 # Split dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Model: SVM
-model = SVC(kernel="linear", C=1.000000)
+# Model: RandomForestClassifier
+model = RandomForestClassifier(n_estimators=100, max_depth=4)
 
 print('🚀 Starting training...')
 model.fit(X_train, y_train)
@@ -37,82 +37,6 @@ accuracy = accuracy_score(y_test, y_pred)
 print(f'📊 Accuracy: {accuracy:.4f}')
 print('\n📋 Classification Report:')
 print(classification_report(y_test, y_pred))
-
-# Save model
-joblib.dump(model, 'model.pkl')
-print('💾 Model saved as model.pkl')
-# =====================================
-# Model 2: LDA
-# Backend: sklearn
-# =====================================
-
-solver = svd
-
-# Imports
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import joblib
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.metrics import accuracy_score, classification_report
-
-# Load dataset
-dataset = pd.read_csv('./data.csv')
-X = dataset.iloc[:, :-1].values
-y = dataset.iloc[:, -1].values
-
-# Split dataset
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Model: LDA
-model = LinearDiscriminantAnalysis(solver="svd")
-
-print('🚀 Starting training...')
-model.fit(X_train, y_train)
-print('✅ Training completed!')
-
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print(f'📊 Accuracy: {accuracy:.4f}')
-print('\n📋 Classification Report:')
-print(classification_report(y_test, y_pred))
-
-# Save model
-joblib.dump(model, 'model.pkl')
-print('💾 Model saved as model.pkl')
-# =====================================
-# Model 3: LinearRegression
-# Backend: sklearn
-# =====================================
-
-fit_intercept = true
-
-# Imports
-import pandas as pd
-from sklearn.model_selection import train_test_split
-import joblib
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-
-# Load dataset
-dataset = pd.read_csv('./data.csv')
-X = dataset.iloc[:, :-1].values
-y = dataset.iloc[:, -1].values
-
-# Split dataset
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Model: LinearRegression
-model = LinearRegression(fit_intercept=True)
-
-print('🚀 Starting training...')
-model.fit(X_train, y_train)
-print('✅ Training completed!')
-
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f'📊 Mean Squared Error: {mse:.4f}')
-print(f'📊 R² Score: {r2:.4f}')
 
 # Save model
 joblib.dump(model, 'model.pkl')

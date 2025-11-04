@@ -109,6 +109,22 @@ app.post('/api/compile', async (req, res) => {
   }
 })
 
+// Get train.py content
+app.get('/api/files/train', async (req, res) => {
+  try {
+    const trainPyPath = path.join(COMPILER_DIR, 'train.py')
+    
+    try {
+      const content = await fs.readFile(trainPyPath, 'utf-8')
+      res.json({ success: true, content, filename: 'train.py' })
+    } catch {
+      return res.status(404).json({ success: false, error: 'train.py not found. Please compile first.' })
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 // Download train.py
 app.get('/api/download/train', async (req, res) => {
   try {

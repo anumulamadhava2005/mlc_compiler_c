@@ -22,7 +22,7 @@ if [ ! -d "node_modules" ] || [ ! -d "frontend/node_modules" ]; then
 fi
 
 echo -e "${GREEN}✅ Starting servers...${NC}"
-echo -e "${BLUE}Frontend: http://localhost:3000${NC}"
+echo -e "${BLUE}Frontend: http://localhost:3001${NC}"
 echo -e "${BLUE}Backend:  http://localhost:5000${NC}\n"
 
 npm run dev

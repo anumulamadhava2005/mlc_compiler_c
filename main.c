@@ -6,7 +6,7 @@
 extern int yyparse(void);
 extern FILE *yyin;
 
-int verbose_mode = 0;
+int verbose_mode = 1;  // Default to verbose to show all compilation phases
 int line_number = 1;
 
 void print_header() {
@@ -18,9 +18,10 @@ void print_header() {
 }
 
 void print_usage() {
-    printf("Usage: ./mlc_compiler_verbose [options] <input.mlc>\n");
+    printf("Usage: ./mlc_compiler [options] <input.mlc>\n");
     printf("Options:\n");
-    printf("  -v, --verbose    Show all compilation phases\n");
+    printf("  -v, --verbose    Show all compilation phases (default)\n");
+    printf("  -q, --quiet      Suppress compilation phase output\n");
     printf("  -h, --help       Show this help message\n");
 }
 
@@ -31,6 +32,8 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
             verbose_mode = 1;
+        } else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
+            verbose_mode = 0;
         } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_usage();
             return 0;
